@@ -1,14 +1,12 @@
 """Oauth Client Controller"""
 
-from secrets import token_urlsafe
+from secrets import token_urlsafe, compare_digest
 from urllib.parse import parse_qs, urlencode
 
 from bareasgi import Application, HttpRequest, HttpResponse
-from bareutils import response_code
-from bareutils.streaming import text_writer, text_reader
+from bareasgi_session import session_data
+from bareutils import response_code, text_writer, text_reader
 from bareclient import HttpClient
-
-SESSION = {}
 
 
 class OAuthClientController:
@@ -45,9 +43,10 @@ class OAuthClientController:
         )
         return app
 
-    async def request_authorization(self, _request: HttpRequest) -> HttpResponse:
+    async def request_authorization(self, request: HttpRequest) -> HttpResponse:
         state = token_urlsafe(32)
-        SESSION['oauth_state'] = state
+        session = session_data(request)
+        session['oauth_state'] = state
         location = self.authorization_base_url + '?' + urlencode(
             (
                 ('client_id', self.client_id),
@@ -61,12 +60,13 @@ class OAuthClientController:
         )
 
     async def oauth_server_callback(self, request: HttpRequest) -> HttpResponse:
-        state = SESSION['oauth_state']
+        session = session_data(request)
+        state = session['oauth_state']
         params = {
             name.decode(): values[0].decode()
             for name, values in parse_qs(request.scope['query_string']).items()
         }
-        assert params['state'] == state
+        assert compare_digest(params['state'], state)
         headers = [
             (b'content-type', b'application/x-www-form-urlencoded')
         ]
@@ -90,8 +90,8 @@ class OAuthClientController:
             # At this point you can fetch protected resources but lets save
             # the token and show how this is done from a persisted token
             # in /profile.
-            SESSION['oauth_token'] = results['access_token'][0]
-            SESSION['oauth_token_type'] = results['token_type'][0]
+            session['oauth_token'] = results['access_token'][0]
+            session['oauth_token_type'] = results['token_type'][0]
 
         location = self.path_prefix + '/profile'
 
@@ -101,8 +101,9 @@ class OAuthClientController:
             headers
         )
 
-    async def oauth_server_profile(self, _request: HttpRequest) -> HttpResponse:
-        token = SESSION['oauth_token']
+    async def oauth_server_profile(self, request: HttpRequest) -> HttpResponse:
+        session = session_data(request)
+        token = session['oauth_token']
         headers = [
             (b'authorization', f"token {token}".encode())
         ]
