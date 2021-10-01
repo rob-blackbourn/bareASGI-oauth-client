@@ -1,12 +1,32 @@
 """Oauth Client Controller"""
 
 from secrets import token_urlsafe, compare_digest
+from typing import Any, Dict, Sequence, Tuple
 from urllib.parse import parse_qs, urlencode
 
 from bareasgi import Application, HttpRequest, HttpResponse
 from bareasgi_session import session_data
 from bareutils import response_code, text_writer, text_reader
 from bareclient import HttpClient
+
+
+def _make_redirect_response(
+        url: str,
+        params: Sequence[Tuple[str, str]]
+) -> HttpResponse:
+    location = url + '?' + urlencode(params)
+    headers = [(b'location', location.encode())]
+    return HttpResponse(
+        response_code.FOUND,
+        headers
+    )
+
+
+def _unpack_unique_query_string(query_string: bytes) -> Dict[str, Any]:
+    return {
+        name.decode(): values[0].decode()
+        for name, values in parse_qs(query_string).items()
+    }
 
 
 class OAuthClientController:
@@ -47,33 +67,43 @@ class OAuthClientController:
         state = token_urlsafe(32)
         session = session_data(request)
         session['oauth_state'] = state
-        location = self.authorization_base_url + '?' + urlencode(
-            (
-                ('client_id', self.client_id),
-                ('state', state)
-            )
+        params = (
+            ('client_id', self.client_id),
+            ('state', state)
         )
+        return _make_redirect_response(self.authorization_base_url, params)
+
+    async def oauth_server_callback(self, request: HttpRequest) -> HttpResponse:
+        session = session_data(request)
+        state = session['oauth_state']
+        params = _unpack_unique_query_string(request.scope['query_string'])
+        if not compare_digest(params['state'], state):
+            return HttpResponse(response_code.FORBIDDEN)
+
+        token, token_type = await self._request_access_token(params['code'])
+
+        session['oauth_token'] = token
+        session['oauth_token_type'] = token_type
+
+        location = self.path_prefix + '/profile'
+
         headers = [(b'location', location.encode())]
         return HttpResponse(
             response_code.FOUND,
             headers
         )
 
-    async def oauth_server_callback(self, request: HttpRequest) -> HttpResponse:
-        session = session_data(request)
-        state = session['oauth_state']
-        params = {
-            name.decode(): values[0].decode()
-            for name, values in parse_qs(request.scope['query_string']).items()
-        }
-        assert compare_digest(params['state'], state)
+    async def _request_access_token(
+            self,
+            code: str
+    ) -> Tuple[str, str]:
         headers = [
             (b'content-type', b'application/x-www-form-urlencoded')
         ]
         body = urlencode([
             ('client_id', self.client_id),
             ('client_secret', self.client_secret),
-            ('code', params['code'])
+            ('code', code)
         ])
 
         async with HttpClient(
@@ -85,25 +115,20 @@ class OAuthClientController:
             assert oauth_response.body is not None
             oauth_body = await text_reader(oauth_response.body)
             results = parse_qs(oauth_body)
-            print(results)
-
-            # At this point you can fetch protected resources but lets save
-            # the token and show how this is done from a persisted token
-            # in /profile.
-            session['oauth_token'] = results['access_token'][0]
-            session['oauth_token_type'] = results['token_type'][0]
-
-        location = self.path_prefix + '/profile'
-
-        headers = [(b'location', location.encode())]
-        return HttpResponse(
-            response_code.FOUND,
-            headers
-        )
+            return results['access_token'][0], results['token_type'][0]
 
     async def oauth_server_profile(self, request: HttpRequest) -> HttpResponse:
         session = session_data(request)
         token = session['oauth_token']
+        user_profile = await self._request_github_user_profile(token)
+
+        return HttpResponse(
+            200,
+            [(b'content-type', b'application/json')],
+            text_writer(user_profile)
+        )
+
+    async def _request_github_user_profile(self, token: str) -> str:
         headers = [
             (b'authorization', f"token {token}".encode())
         ]
@@ -112,11 +137,4 @@ class OAuthClientController:
             headers=headers
         ) as oauth_response:
             assert oauth_response.body is not None
-            oauth_body = await text_reader(oauth_response.body)
-            print(oauth_body)
-
-        return HttpResponse(
-            200,
-            [(b'content-type', b'application/json')],
-            text_writer(oauth_body)
-        )
+            return await text_reader(oauth_response.body)

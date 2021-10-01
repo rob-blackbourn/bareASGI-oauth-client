@@ -59,7 +59,7 @@ jetblack-asgi-typing = ">=0.4.0,<0.5.0"
 
 [[package]]
 name = "bareasgi-session"
-version = "4.0.0a2"
+version = "4.0.0a3"
 description = "Session support for bareASGI"
 category = "main"
 optional = false
@@ -406,7 +406,7 @@ graphene = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "2db2c608ce0e12b37a7b0c9e813e7301be390a2eb1316c6c6dea0627f3ff390d"
+content-hash = "ccf869753a5c6699302b200676efd83c6ad578d5e866911d184322c38d48e5f7"
 
 [metadata.files]
 astroid = [
@@ -430,8 +430,8 @@ bareasgi = [
     {file = "bareasgi-4.0.0a5.tar.gz", hash = "sha256:9fb5ada2c902b96e6032e19832e4df4df249d30d5016d53b9d7bd81a3c1e20b4"},
 ]
 bareasgi-session = [
-    {file = "bareASGI-session-4.0.0a2.tar.gz", hash = "sha256:e47597f840199631cccdf7e9ef3dcc69d588cc74076c9ac6980f205a208cbf14"},
-    {file = "bareASGI_session-4.0.0a2-py3-none-any.whl", hash = "sha256:b2eb5019c4bd83dba80014fd91bc94e78a0b74170870657e386d0d16b5f5523c"},
+    {file = "bareASGI-session-4.0.0a3.tar.gz", hash = "sha256:9e826b7346fb765f8383efd0b63e6b8b2dabf40b6f12b5a21b298d2e17e3ae50"},
+    {file = "bareASGI_session-4.0.0a3-py3-none-any.whl", hash = "sha256:e72d9dd82ae87f122dd74c074efe87daef7f92a8f1ccec2573618312b425faee"},
 ]
 bareclient = [
     {file = "bareclient-5.0.0a7-py3-none-any.whl", hash = "sha256:05cfbe6e02e9adcbaf2694aa96865d22ffb28bef7af4180b463c71e9dd29ad5d"},
