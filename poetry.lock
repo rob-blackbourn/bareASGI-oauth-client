@@ -70,7 +70,7 @@ bareasgi = ">=4.0.0-alpha.5,<5.0.0"
 
 [[package]]
 name = "bareclient"
-version = "5.0.0a7"
+version = "5.0.0a8"
 description = "A lightweight asyncio HTTP client"
 category = "main"
 optional = false
@@ -406,7 +406,7 @@ graphene = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "ccf869753a5c6699302b200676efd83c6ad578d5e866911d184322c38d48e5f7"
+content-hash = "bfa262bed314d00cf4fe9d7b7cdf9e67ed22d62a441df8f13f4e907d83f4001d"
 
 [metadata.files]
 astroid = [
@@ -434,8 +434,8 @@ bareasgi-session = [
     {file = "bareASGI_session-4.0.0a3-py3-none-any.whl", hash = "sha256:e72d9dd82ae87f122dd74c074efe87daef7f92a8f1ccec2573618312b425faee"},
 ]
 bareclient = [
-    {file = "bareclient-5.0.0a7-py3-none-any.whl", hash = "sha256:05cfbe6e02e9adcbaf2694aa96865d22ffb28bef7af4180b463c71e9dd29ad5d"},
-    {file = "bareclient-5.0.0a7.tar.gz", hash = "sha256:8dcca695eeee91611aab5d597b4bdb940890580cccb054bba19e67741f1051ca"},
+    {file = "bareclient-5.0.0a8-py3-none-any.whl", hash = "sha256:81e886cc3664099074a327bd956af6137b74df4e6c4b66e4ee7c15f766c74686"},
+    {file = "bareclient-5.0.0a8.tar.gz", hash = "sha256:d289d4acf229b0ce4445033547d3a3b090b0edb0b5b31906d70690a9423a7ddf"},
 ]
 bareutils = [
     {file = "bareutils-4.0.0a0-py3-none-any.whl", hash = "sha256:1911042d030802965802b07f12f1142e60cf409b08310bb4819f276c77e463a4"},
