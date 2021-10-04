@@ -129,7 +129,7 @@ class GoogleOAuthClientController:
             headers=headers,
             body=bytes_writer(body)
         ) as response:
-            if not response_code.is_successful(response.status_code):
+            if not response.ok:
                 raise RuntimeError('Failed to get access token')
             assert response.body is not None
             oauth_body = await text_reader(response.body)
@@ -154,6 +154,8 @@ class GoogleOAuthClientController:
         async with HttpClient(
             self.profile_url,
             headers=headers
-        ) as oauth_response:
-            assert oauth_response.body is not None
-            return await text_reader(oauth_response.body)
+        ) as response:
+            if not response.ok:
+                raise RuntimeError('Failed to get access token')
+            assert response.body is not None
+            return await text_reader(response.body)

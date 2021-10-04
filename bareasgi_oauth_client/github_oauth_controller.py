@@ -117,9 +117,11 @@ class GitHubOAuthClientController:
             method='POST',
             headers=headers,
             body=text_writer(body)
-        ) as oauth_response:
-            assert oauth_response.body is not None
-            oauth_body = await text_reader(oauth_response.body)
+        ) as response:
+            if not response.ok:
+                raise RuntimeError('Failed to get access token')
+            assert response.body is not None
+            oauth_body = await text_reader(response.body)
             results = parse_qs(oauth_body)
             return results['access_token'][0], results['token_type'][0]
 
@@ -141,6 +143,8 @@ class GitHubOAuthClientController:
         async with HttpClient(
             self.profile_url,
             headers=headers
-        ) as oauth_response:
-            assert oauth_response.body is not None
-            return await text_reader(oauth_response.body)
+        ) as response:
+            if not response.ok:
+                raise RuntimeError('Failed to get profile')
+            assert response.body is not None
+            return await text_reader(response.body)

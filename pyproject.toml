@@ -12,10 +12,10 @@ repository = "https://github.com/rob-blackbourn/bareasgi-oauth-client"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-bareASGI = "^4.0.0-alpha.5"
-bareASGI-session = "^4.0.0-alpha.3"
+bareASGI = "^4.0.0"
+bareASGI-session = "^4.0.1"
 Hypercorn = "^0.11"
-bareclient = "^5.0.0-alpha.8"
+bareclient = "^5.0.0"
 oauthlib = "^3.1.1"
 
 [tool.poetry.dev-dependencies]
